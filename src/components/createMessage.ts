@@ -7,21 +7,18 @@ const createMessage = (message: string, type: MessageType, timeout?: number) => 
     message,
     type
   })
-
   const mountNode = document.createElement('div')
   document.body.appendChild(mountNode)
   render(messageVnode, mountNode)
-  const destroy = () => {
+  const destory = () => {
     render(null, mountNode)
     document.body.removeChild(mountNode)
   }
   if (timeout) {
     setTimeout(() => {
-      destroy()
+      destory()
     }, timeout)
   }
-
-  return { destroy }
 }
 
 export default createMessage

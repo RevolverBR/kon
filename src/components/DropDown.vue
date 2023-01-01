@@ -1,47 +1,43 @@
 <template>
-  <div class="dropdown" ref="dropDownRef">
-    <a
-      href=""
-      class="btn btn-outline-light my-2 dropdown-toggle"
-      @click.prevent="toggleOpen"
-      >{{ title }}</a
-    >
-    <ul class="dropdown-menu" :style="{ display: 'block' }" v-if="isOpen">
-      <slot></slot>
-    </ul>
-  </div>
+<div class="dropdown" ref="dropdownRef">
+  <a href="#" class="btn btn-outline-light my-2 dropdown-toggle" @click.prevent="toggleOpen">
+    {{title}}
+  </a>
+  <ul class="dropdown-menu" :style="{display: 'block'}" v-if="isOpen">
+    <slot></slot>
+  </ul>
+</div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, watch } from 'vue'
-import useClickOutSide from '@/assets/js/useClickOutSide'
-
+import useClickOutside from '../hooks/useClickOutside'
 export default defineComponent({
-  name: 'DropDown',
+  name: 'Dropdown',
   props: {
     title: {
       type: String,
       required: true
     }
   },
-  setup () {
+  setup() {
     const isOpen = ref(false)
-    // 下拉菜单按钮实例
-    const dropDownRef = ref<null | HTMLElement>(null)
-    // 下拉菜单状态
+    const dropdownRef = ref<null | HTMLElement>(null)
     const toggleOpen = () => {
       isOpen.value = !isOpen.value
     }
+    const isClickOutside = useClickOutside(dropdownRef)
 
-    const isClickOutSide = useClickOutSide(dropDownRef)
-    // 点击其他区域隐藏下拉菜单
-    watch(isClickOutSide, () => {
-      if (isOpen.value && isClickOutSide.value) {
+    watch(isClickOutside, () => {
+      if (isOpen.value && isClickOutside.value) {
         isOpen.value = false
       }
     })
-
-    return { isOpen, toggleOpen, dropDownRef }
+    return {
+      isOpen,
+      toggleOpen,
+      dropdownRef
+    }
   }
 })
 </script>

@@ -1,35 +1,30 @@
 <template>
   <div class="file-upload">
-    <div @click.prevent="triggerUpload" class="file-upload-container" v-bind="$attrs">
-      <slot name="loading" v-if="fileStatus === 'loading'">
+    <div class="file-upload-container" @click.prevent="triggerUpload" v-bind="$attrs">
+      <slot v-if="fileStatus === 'loading'" name="loading">
         <button class="btn btn-primary" disabled>正在上传...</button>
       </slot>
-      <slot name="uploaded" v-else-if="fileStatus === 'success'" :uploadedData="uploadedData">
+      <slot v-else-if="fileStatus === 'success'" name="uploaded" :uploadedData="uploadedData">
         <button class="btn btn-primary">上传成功</button>
       </slot>
-      <slot name="default" v-else>
+      <slot v-else name="default">
         <button class="btn btn-primary">点击上传</button>
       </slot>
     </div>
     <input
       type="file"
       class="file-input d-none"
-      ref="fileInputRef"
+      ref="fileInput"
       @change="handleFileChange"
-    />
+    >
   </div>
 </template>
-
 <script lang="ts">
-import { defineComponent, ref, PropType } from 'vue'
+import { defineComponent, ref, PropType, watch } from 'vue'
 import axios from 'axios'
-
 type UploadStatus = 'ready' | 'loading' | 'success' | 'error'
-type CheckFunction = (file: File) => boolean
-
+type CheckFunction = (file: File) => boolean;
 export default defineComponent({
-  name: 'Uploader',
-  emits: ['file-uploaded', 'file-uploaded-error'],
   props: {
     action: {
       type: String,
@@ -37,20 +32,29 @@ export default defineComponent({
     },
     beforeUpload: {
       type: Function as PropType<CheckFunction>
+    },
+    uploaded: {
+      type: Object
     }
   },
   inheritAttrs: false,
-  setup (props, context) {
-    const fileInputRef = ref<null | HTMLInputElement>(null)
-    const fileStatus = ref<UploadStatus>('ready')
-    const uploadedData = ref()
-
+  emits: ['file-uploaded', 'file-uploaded-error'],
+  setup(props, context) {
+    const fileInput = ref<null | HTMLInputElement>(null)
+    console.log(props.uploaded)
+    const fileStatus = ref<UploadStatus>(props.uploaded ? 'success' : 'ready')
+    const uploadedData = ref(props.uploaded)
+    watch(() => props.uploaded, (newValue) => {
+      if (newValue) {
+        fileStatus.value = 'success'
+        uploadedData.value = newValue
+      }
+    })
     const triggerUpload = () => {
-      if (fileInputRef.value) {
-        fileInputRef.value.click()
+      if (fileInput.value) {
+        fileInput.value.click()
       }
     }
-
     const handleFileChange = (e: Event) => {
       const currentTarget = e.target as HTMLInputElement
       if (currentTarget.files) {
@@ -68,27 +72,26 @@ export default defineComponent({
           headers: {
             'Content-Type': 'multipart/form-data'
           }
-        }).then((res) => {
+        }).then(resp => {
           fileStatus.value = 'success'
-          uploadedData.value = res.data
-          context.emit('file-uploaded', res.data)
+          uploadedData.value = resp.data
+          context.emit('file-uploaded', resp.data)
         }).catch((error) => {
           fileStatus.value = 'error'
           context.emit('file-uploaded-error', { error })
         }).finally(() => {
-          if (fileInputRef.value) {
-            fileInputRef.value.value = ''
+          if (fileInput.value) {
+            fileInput.value.value = ''
           }
         })
       }
     }
-
     return {
-      fileInputRef,
+      fileInput,
       triggerUpload,
       fileStatus,
-      handleFileChange,
-      uploadedData
+      uploadedData,
+      handleFileChange
     }
   }
 })

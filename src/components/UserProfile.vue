@@ -21,7 +21,7 @@ export default defineComponent({
       required: true
     }
   },
-  setup (props) {
+  setup(props) {
     const fitUrl = computed(() => {
       addColumnAvatar(props.user, 50, 50)
       const { avatar } = props.user

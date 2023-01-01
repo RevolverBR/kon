@@ -1,10 +1,9 @@
 <template>
   <teleport to="#message">
-    <div class="alert message-info fixed-top w-50 mx-auto d-flex justify-content-between mt-2" role="alert" :class="classObject" v-if="isVisible">
-      <span>{{ message }}</span>
-      <button @click.prevent="hide" type="button" class="btn btn-primary" id="liveAlertBtn">
-        <span aria-hidden="true">&times;</span>
-      </button>
+    <div class="alert message-info fixed-top w-50 mx-auto d-flex justify-content-between mt-2"
+      :class="classObject" v-if="isVisible">
+      <span>{{message}}</span>
+      <button type="button" class="btn-close" aria-label="Close"></button>
     </div>
   </teleport>
 </template>
@@ -12,11 +11,8 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue'
 import useDOMCreate from '../hooks/useDOMCreate'
-
 export type MessageType = 'success' | 'error' | 'default'
-
 export default defineComponent({
-  name: 'Message',
   props: {
     message: String,
     type: {
@@ -24,10 +20,8 @@ export default defineComponent({
       default: 'default'
     }
   },
-  emits: [
-    'colse-message'
-  ],
-  setup (props, context) {
+  emits: ['close-message'],
+  setup(props, context) {
     useDOMCreate('message')
     const isVisible = ref(true)
     const classObject = {
@@ -37,9 +31,8 @@ export default defineComponent({
     }
     const hide = () => {
       isVisible.value = false
-      context.emit('colse-message', true)
+      context.emit('close-message', true)
     }
-
     return {
       classObject,
       isVisible,
@@ -47,4 +40,5 @@ export default defineComponent({
     }
   }
 })
+
 </script>

@@ -47,8 +47,8 @@
 import { defineComponent, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-import ValidateInput, { RulesProp } from '../components/base/validate/ValidateInput.vue'
-import ValidateForm from '../components/base/validate/ValidateForm.vue'
+import ValidateInput, { RulesProp } from '../components/ValidateInput.vue'
+import ValidateForm from '../components/ValidateForm.vue'
 import createMessage from '../components/createMessage'
 
 export default defineComponent({
@@ -57,7 +57,7 @@ export default defineComponent({
     ValidateInput,
     ValidateForm
   },
-  setup () {
+  setup() {
     const formData = reactive({
       email: '',
       nickName: '',
@@ -92,7 +92,7 @@ export default defineComponent({
           password: formData.password,
           nickName: formData.nickName
         }
-        axios.post('/users/', payload).then(() => {
+        axios.post('/users/', payload).then(data => {
           createMessage('注册成功 正在跳转登录页面', 'success', 2000)
           setTimeout(() => {
             router.push('/login')

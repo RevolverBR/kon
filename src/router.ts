@@ -1,15 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
-
+import axios from 'axios'
 import Home from './views/Home.vue'
 import Login from './views/Login.vue'
+import Signup from './views/Signup.vue'
 import ColumnDetail from './views/ColumnDetail.vue'
 import CreatePost from './views/CreatePost.vue'
-import SignUp from './views/SignUp.vue'
 import PostDetail from './views/PostDetail.vue'
-
 import store from './store'
-import axios from 'axios'
-
 const routerHistory = createWebHistory()
 const router = createRouter({
   history: routerHistory,
@@ -26,9 +23,10 @@ const router = createRouter({
       meta: { redirectAlreadyLogin: true }
     },
     {
-      path: '/column/:id',
-      name: 'column',
-      component: ColumnDetail
+      path: '/signup',
+      name: 'signup',
+      component: Signup,
+      meta: { redirectAlreadyLogin: true }
     },
     {
       path: '/create',
@@ -37,27 +35,18 @@ const router = createRouter({
       meta: { requiredLogin: true }
     },
     {
-      path: '/signup',
-      name: 'signup',
-      component: SignUp
+      path: '/column/:id',
+      name: 'column',
+      component: ColumnDetail
     },
     {
       path: '/posts/:id',
-      name: 'posts',
+      name: 'post',
       component: PostDetail
     }
   ]
 })
-
 router.beforeEach((to, from, next) => {
-  // if (to.meta.requiredLogin && !store.state.user.isLogin) {
-  //   next({ name: 'login' })
-  // } else if (to.meta.redirectAlreadyLogin && store.state.user.isLogin) {
-  //   next('/')
-  // } else {
-  //   next()
-  // }
-
   const { user, token } = store.state
   const { requiredLogin, redirectAlreadyLogin } = to.meta
   if (!user.isLogin) {
@@ -69,8 +58,8 @@ router.beforeEach((to, from, next) => {
         } else {
           next()
         }
-      }).catch((e) => {
-        console.log(e)
+      }).catch(e => {
+        console.error(e)
         store.commit('logout')
         next('login')
       })

@@ -6,60 +6,49 @@
           <img src="../assets/callout.svg" alt="callout" class="w-50"/>
           <h2 class="font-weight-light">随心写作，自由表达</h2>
           <p>
-            <router-link to="/create" class="btn btn-primary my-2">开始写文章</router-link>
+            <a href="#" class="btn btn-primary my-2">开始写文章</a>
           </p>
         </div>
       </div>
     </section>
-    <Uploader action="/upload" :beforeUpload="beforeUpload" @file-uploaded="onFileUploaded">
-      <template #uploaded="dataProps">
-        <img :src="dataProps.uploadedData.data.url" width="500" alt="">
-      </template>
-    </Uploader>
     <h4 class="font-weight-bold text-center">发现精彩</h4>
     <column-list :list="list"></column-list>
+    <button
+      class="btn btn-outline-primary mt-2 mb-5 mx-auto btn-block w-25 d-block"
+       @click="loadMorePage" v-if="!isLastPage"
+    >
+      加载更多
+    </button>
+
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
-
-// import { testData } from '../testData'
+import { GlobalDataProps } from '../store'
+import useLoadMore from '../hooks/useLoadMore'
 import ColumnList from '../components/ColumnList.vue'
-import Uploader from '@/components/Uploader.vue'
-
-import { GlobalDataProps, ResponseType, ImageProps } from '../store'
-import createMessage from '@/components/createMessage'
 
 export default defineComponent({
   name: 'Home',
   components: {
-    ColumnList,
-    Uploader
+    ColumnList
   },
-  setup () {
+  setup() {
     const store = useStore<GlobalDataProps>()
-    const list = computed(() => store.state.columns)
-
+    const total = computed(() => store.state.columns.total)
+    const currentPage = computed(() => store.state.columns.currentPage)
     onMounted(() => {
-      store.dispatch('fetchColumns')
+      store.dispatch('fetchColumns', { pageSize: 3 })
     })
-
-    // 自定义上传检查
-    const beforeUpload = (file: File) => {
-      const isJPG = file.type === 'image/jpeg'
-      if (!isJPG) {
-        createMessage('上传图片只能是jpg格式', 'error', 1500)
-      }
-      return isJPG
+    const list = computed(() => store.getters.getColumns)
+    const { loadMorePage, isLastPage } = useLoadMore('fetchColumns', total, { pageSize: 3, currentPage: (currentPage.value ? currentPage.value + 1 : 2) })
+    return {
+      list,
+      loadMorePage,
+      isLastPage
     }
-
-    const onFileUploaded = (rawData: ResponseType<ImageProps>) => {
-      createMessage(`上传图片id ${rawData.data._id}`, 'success', 2000)
-    }
-
-    return { list, beforeUpload, onFileUploaded }
   }
 })
 </script>
